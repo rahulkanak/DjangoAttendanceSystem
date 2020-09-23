@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    View Class Page
+{% endblock %}
+
+{% block content %}
+
+<table class="table table-striped table-hover">
+  <thead>
+  <tr>
+      <th scope="col">Class Name</th>
+      <th scope="col">Students</th>
+      <th scope="col">
+        <a href="{% url 'classreg:add-class' %}" class="btn btn-secondary" role="button" aria-disabled="true">
+            <i class="fas fa-user-plus"></i>
+            Add Class
+        </a>
+    </th>
+
+  </tr>
+  </thead>
+  <tbody>
+
+  {% for subject in class_list %}
+  <tr>
+
+      <td scope="row">{{ subject.class_name }}</td>
+      <td>{% for student in subject.student.all %}
+             {{ student.first_name }}
+                {% if not forloop.last %},{% endif %}
+          {% endfor %}
+      </td>
+      <td>
+          <a class="btn text-secondary px-0" href="{% url 'classreg:update-class' subject.id %}" data-toggle="tooltip" title="Edit">
+            <i class="fas fa-edit"></i>
+          </a>
+          <a class="btn text-secondary px-0" href="javascript:delete_class('{{subject.id}}')" data-toggle="tooltip" title="Edit">
+             <i class="fas fa-trash-alt text-danger float-right"></i>
+          </a>
+      </td>
+
+  </tr>
+  {% endfor %}
+
+
+  </tbody>
+</table>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function delete_class(subject_id){
+        $.ajax({
+           url:"{% url 'classreg:delete-class' %}",
+           type:'POST',
+           data:{subject_id: subject_id},
+        })
+            .done(function(response){
+                if(response == 'OK'){
+                    alert('Class Deleted Successfully!!!');
+                    location.reload();
+                }else{
+                    alert('Error in Deleting Class');
+                }
+
+            })
+            .fail(function(){
+               alert('Error in Deleting Class');
+            })
+    }
+</script>
+{% endblock %}

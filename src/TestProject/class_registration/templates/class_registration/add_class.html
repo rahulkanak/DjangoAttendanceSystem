@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    Add Class Page
+{% endblock %}
+
+{% block content %}
+
+<form action="." method="POST" autocomplete="off">{% csrf_token %}
+
+        <fieldset class="form-group">
+            <legend class="legend mb-4"> Add Class</legend>
+            {{ form|crispy }}
+        </fieldset>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-database"></i>
+                Add
+            </button>
+            <a href="{% url 'classreg:view-class' %}" class="btn btn-primary" role="button" aria-disabled="true" style="float: right">
+                <i class="fas fa-list"></i>
+                View Classes
+            </a>
+        </div>
+
+
+</form>
+
+{% endblock %}

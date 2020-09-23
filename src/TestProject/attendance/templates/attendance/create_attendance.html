@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    Mark Attendance Page
+{% endblock %}
+
+{% block content %}
+
+<form method="POST" action=".">{% csrf_token %}
+    <!--{% crispy formset helper %}-->
+    <!--{{ form|crispy }}-->
+    <table id='supertable' class="table table-striped">
+        {% for form in formset %}
+            {% if forloop.counter == 1 %}
+                <thead>
+                <tr id="tag">
+                    {% for field in form.visible_fields %}
+                        <th scope="col" style="background: floralwhite; line-height:1;
+                        white-space:nowrap; border-bottom-color: black;  border-top-color: black;  border-style: solid" >
+                            {{ field.label_tag }}
+                        </th>
+                    {% endfor %}
+                </tr>
+                </thead>
+            {% endif %}
+            <tbody>
+            <tr id="field_{{forloop.counter}}" >
+                {% for field in form.visible_fields %}
+                    <td scope="row" width="150px">{{ field }}</td>
+                {% endfor %}
+            </tr>
+            </tbody>
+        {% endfor %}
+    </table>
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(function () {
+        $('#datetimepicker4').datetimepicker();
+    });
+</script>
+{% endblock %}

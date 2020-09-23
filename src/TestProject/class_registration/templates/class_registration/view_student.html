@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+{% extends 'base.html' %}
+
+{% block title %}
+    View Student Page
+{% endblock %}
+
+{% block content %}
+
+<table class="table table-striped table-hover">
+    <thead>
+    <tr>
+        <th scope="col">Student Name</th>
+        <th scope="col">Email</th>
+        <th scope="col">Phone</th>
+        <th scope="col">Parent</th>
+        <th scope="col">
+            <a href="{% url 'classreg:add-student' %}" class="btn btn-secondary" role="button" aria-disabled="true">
+                <i class="fas fa-user-plus"></i>
+                Add Student
+            </a>
+        </th>
+
+    </tr>
+    </thead>
+    <tbody>
+
+    {% for student in student_list %}
+    <tr>
+
+    <td scope="row">{{ student.first_name }} {{ student.last_name }}</td>
+    <td>{{ student.email }}</td>
+    <td>{{ student.phone }}</td>
+    <td>{{ student.parent }}</td>
+    <td>
+        <a class="btn text-secondary px-0" href="{% url 'classreg:update-student' student.id %}" data-toggle="tooltip" title="Edit">
+            <i class="fas fa-edit"></i>
+        </a>
+        <a class="btn text-secondary px-0" href="javascript:delete_stundent('{{student.id}}')" data-toggle="tooltip" title="Delete Student">
+            <i class="fas fa-trash-alt text-danger float-right"></i>
+        </a>
+        <a class="btn text-secondary px-0" href="javascript:add_comment('{{student.id}}')" data-toggle="tooltip" title="Add Comments">
+            <i class="fas fa-comments float-right"></i>
+        </a>
+        <a class="btn text-secondary px-0" href="javascript:add_fee('{{student.id}}')" data-toggle="tooltip" title="Add Fees">
+            <i class="fas fa-comments-dollar"></i>
+        </a>
+    </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function delete_stundent(student_id){
+        $.ajax({
+           url:"{% url 'classreg:delete-student' %}",
+           type:'POST',
+           data:{student_id: student_id},
+        })
+            .done(function(response){
+                if(response == 'OK'){
+                    alert('Student Deleted Successfully!!!');
+                    location.reload();
+                }else{
+                    alert('Error in Deleting Student');
+                }
+
+            })
+            .fail(function(){
+               alert('Error in Deleting Student');
+            })
+    }
+
+    function add_comment(student_id){
+        $.ajax({
+           url:"{% url 'classreg:add-comment-ajax' %}",
+           type:'POST',
+           data:{student_id: student_id},
+        })
+            .done(function(response){
+                if(response == 'OK'){
+                    window.location = "../addcomment/"+ student_id
+                }else{
+                    alert('Error in Adding Comments');
+                }
+
+            })
+            .fail(function(){
+               alert('Error in Adding Comments');
+            })
+    }
+
+    function add_fee(student_id){
+        $.ajax({
+           url:"{% url 'classreg:add-fees-ajax' %}",
+           type:'POST',
+           data:{student_id: student_id},
+        })
+            .done(function(response){
+                if(response == 'OK'){
+                    window.location = "../addfees/"+ student_id
+                }else{
+                    alert('Error in Adding Fees');
+                }
+
+            })
+            .fail(function(){
+               alert('Error in Adding Fees');
+            })
+    }
+
+
+</script>
+{% endblock %}

@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    Mark Attendance Page
+{% endblock %}
+
+{% block content %}
+
+<div class="dropdown">
+  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    Subjects
+  </button>
+  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+      {% for subject in subjects %}
+      <a class="dropdown-item" id="{{subject.id}}" href="javascript:fetch_attendance_data('{{subject.id}}')">{{ subject.class_name }}</a>
+      <input type="hidden" name="subject_id" id="subject_id">
+      {% endfor %}
+  </div>
+
+    <div id="student_data">
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function fetch_attendance_data(subject_id){
+        document.getElementById('subject_id').value = subject_id;
+       $.ajax({
+           url:"{% url 'attendance:add-attendance' %}",
+           type:'POST',
+           data:{subject: subject_id},
+       })
+           .done(function(response){
+               var json_data = JSON.parse(response);
+               var div_data = "<div class='form-group'><label>Attendance Date:</label>" +
+                   "<input type='date' name='attendance_date' id='attendance_date' class='form-control'></div><table class='table table-hover'>"
+               var sheet = document.createElement('style')
+               var style=""
+               for(key in json_data){
+                    style +=".radio_item_"+json_data[key]['id']+"{display:none}" +
+                            ".label_item_P_"+json_data[key]['id']+"{width: 75px;height: 40px;border: black;font-weight: bold;background-color: #427b41;text-align: center;opacity: 0.1;}\n" +
+                            ".label_item_A_"+json_data[key]['id']+"{width: 75px;height: 40px;border: black;font-weight: bold;background-color: crimson;text-align: center;opacity: 0.1;}\n" +
+                            ".label_item_T_"+json_data[key]['id']+"{width: 75px;height: 40px;border: black;font-weight: bold;background-color: darkgray;text-align: center;opacity: 0.1;}\n" +
+                            ".radio_item_"+json_data[key]['id']+":checked + label {opacity: 1;}";
+                    div_data+="<tr><td scope='row'><label id='label_"+json_data[key]['id']+"'>"+json_data[key]['name']+"</label></td>"+
+                            "<td><input class='radio_item_"+json_data[key]['id']+"' type='radio' name='"+json_data[key]['id']+"' value='P' id='P_"+json_data[key]['id']+"'/>\n" +
+                            "<label id='label_P_"+json_data[key]['id']+"' class='label_item_P_"+json_data[key]['id']+"' for='P_"+json_data[key]['id']+"'>Present</label></td>" +
+                            "<td><input class='radio_item_"+json_data[key]['id']+"' type='radio' name='"+json_data[key]['id']+"' value='A' id='A_"+json_data[key]['id']+"'/>\n" +
+                            "<label id='label_A_"+json_data[key]['id']+"' class='label_item_A_"+json_data[key]['id']+"' for='A_"+json_data[key]['id']+"'>Absent</label></td>" +
+                            "<td><input class='radio_item_"+json_data[key]['id']+"' type='radio' name='"+json_data[key]['id']+"' value='T' id='T_"+json_data[key]['id']+"'/>\n" +
+                            "<label id='label_T_"+json_data[key]['id']+"' class='label_item_T_"+json_data[key]['id']+"' for='T_"+json_data[key]['id']+"' >Tardy</label></td></tr>"
+               }
+               div_data+="</table>";
+               div_data+="<div class='form-group'><textarea id='attendance_comment' name='attendance_comment' rows='10' cols='75'></textarea></div>"
+               div_data+="<div id='save_button' class='form-group'>";
+               div_data+="<button id='save_attendance' class='btn btn-success' type='button'>Save Attendance</button>";
+               div_data+="</div>"
+               sheet.innerHTML = style;
+               document.body.appendChild(sheet);
+               $("#student_data").html(div_data)
+           })
+           .fail(function(){
+               alert('Error in getting Attendance Data');
+           })
+   }
+
+   $(document).on('click', "#save_attendance",function(){
+       $(this).attr('disabled','disabled')
+       $(this).text("Saving Attendance...")
+       var attendance_date = $('#attendance_date').val()
+       var subject_id = $('#subject_id').val()
+       var comments = $('#attendance_comment').val()
+       console.log(attendance_date);
+       console.log(subject_id);
+       var attendance_data= [];
+       var ele = document.getElementsByTagName('input');
+       for(var i=0;i<ele.length;i++){
+           if(ele[i].type == 'radio'){
+               if(ele[i].checked){
+                   var obj = {}
+                   obj['subject_id'] = subject_id;
+                   obj['student_id'] = ele[i].name;
+                   obj['status'] = ele[i].value;
+                   obj['date'] = attendance_date;
+                   obj['comments'] = comments;
+                   attendance_data.push(obj);
+               }
+           }
+       }
+        $.ajax({
+            url:"{% url 'attendance:save-attendance' %}",
+            type:'POST',
+            contentType: 'application/json; charset=utf-8',
+            data:JSON.stringify(attendance_data),
+            dataType: 'text'
+       })
+            .done(function(response){
+                if(response == "ERR"){
+                    alert("Error in Attendance Save");
+                }
+                location.reload();
+            })
+            .fail(function() {
+                alert("Error in saving attendance");
+            })
+
+   })
+
+   $(document).on('change','#attendance_date', function(){
+       var attendance_date = $('#attendance_date').val()
+       var subject_id = $('#subject_id').val()
+       $.ajax({
+            url:"{% url 'attendance:saved-attendance' %}",
+            type:'POST',
+            data: {'subject_id': subject_id, "attendance_date": attendance_date}
+       })
+           .done(function(response){
+                if(response == "ERR"){
+                    var div_data = ""
+                    div_data+="<button id='save_attendance' class='btn btn-success' type='button'>Save Attendance</button>";
+                    $("#save_button").html(div_data)
+                    $('input:radio').prop('disabled',false);
+                    $("textarea[name='attendance_comment']").val('');
+                    var ele = document.getElementsByTagName('label');
+                    for(var i=0;i<ele.length;i++){
+                        if(ele[i].getAttribute('style')){
+                            ele[i].removeAttribute('style');
+                        }
+                    }
+
+                }else{
+                    var json_data = JSON.parse(response);
+                    var comment = json_data[0]['comment'];
+                    $("textarea[name='attendance_comment']").val(comment);
+                    var ele = document.getElementsByTagName('label');
+                    for(var i=0;i<ele.length;i++){
+                        if(ele[i].getAttribute('style')){
+                            ele[i].removeAttribute('style');
+                        }
+                    }
+                    for(key in json_data){
+                        var id = json_data[key]['student_id'];
+                        var status = json_data[key]['status'];
+                        $('input[name='+id+']').attr('disabled','disabled');
+                        $('#label_'+status+'_'+id).css({'opacity':'1'});
+                    }
+                    $("#save_attendance").remove()
+                    var div_data = ""
+                    div_data+="<button id='update_comment' class='btn btn-success' type='button'>Update Comment</button>";
+                    $("#save_button").html(div_data)
+
+                }
+           })
+           .fail(function() {
+                alert("Error in retrieving saved attendance");
+           })
+   })
+
+    $(document).on('click', "#update_comment",function(){
+       $(this).attr('disabled','disabled')
+       $(this).text("Saving Comment...")
+       var attendance_date = $('#attendance_date').val()
+       var subject_id = $('#subject_id').val()
+       var comments = $('#attendance_comment').val()
+       console.log(attendance_date);
+       console.log(subject_id);
+       console.log(comments);
+        $.ajax({
+            url:"{% url 'attendance:save-comment' %}",
+            type:'POST',
+            data: {'attendance_date': attendance_date, 'subject_id':subject_id,'comments':comments},
+       })
+            .done(function(response){
+                if(response == "ERR"){
+                    alert("Error in Saving Comment");
+                }
+                location.reload();
+            })
+            .fail(function() {
+                alert("Error in saving comment");
+            })
+   })
+
+</script>
+{% endblock %}

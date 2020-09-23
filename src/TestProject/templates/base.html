@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{% static 'main.css' %}?version=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
+    <title>{% block title %}{% endblock title %}</title>
+
+</head>
+<body>
+
+    <header class="site-header">
+        <nav class="nav navbar-expand-md navnar-dark bg-steel fixed-top">
+            <div class="container">
+                <div class="collapse navbar-collapse" id="navbarToggle">
+                    <div class="navbar-nav mr-auto">
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'account:user-home' %}" class="nav-item nav-link">Home</a>
+                        {% endif %}
+                    </div>
+                    <div class="navbar-nav">
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'account:user-logout' %}" class="nav-item nav-link">Logout</a>
+                        {% else %}
+                            <a href="{% url 'account:user-login' %}" class="nav-item nav-link">Login</a>
+                            <a href="{% url 'account:user-register' %}" class="nav-item nav-link">Register</a>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main role="main" class="container">
+      <div class="row">
+        {% if user.is_authenticated %}
+
+          <div class="col-auto">
+            <div class="list-group" id="list-tab" role="tablist">
+              <a class="list-group-item list-group-item-action" id="list-students-list" data-toggle="list" href="#list-students" role="tab" aria-controls="students">Students</a>
+              <a class="list-group-item list-group-item-action" id="list-classes-list" data-toggle="list" href="#list-classes" role="tab" aria-controls="classes">Classes</a>
+              <a class="list-group-item list-group-item-action" id="list-attendance-list" data-toggle="list" href="#list-attendance" role="tab" aria-controls="attendance">Attendance</a>
+            </div>
+          </div>
+          <div class="col-md-2">
+            <div class="tab-content" id="nav-tabContent">
+              <div class="tab-pane fade" id="list-students" role="tabpanel" aria-labelledby="list-students-list">
+                  <a href="{% url 'classreg:add-student' %}" class="list-group-item list-group-item-action">Create Students</a>
+                  <a href="{% url 'classreg:view-student' %}" class="list-group-item list-group-item-action">View Students</a>
+              </div>
+              <div class="tab-pane fade" id="list-classes" role="tabpanel" aria-labelledby="list-classes-list">
+                  <a href="{% url 'classreg:add-class' %}" class="list-group-item list-group-item-action">Create Class</a>
+                  <a href="{% url 'classreg:view-class' %}" class="list-group-item list-group-item-action">View Class</a>
+              </div>
+              <div class="tab-pane fade" id="list-attendance" role="tabpanel" aria-labelledby="list-attendance-list">
+                  <a href="{% url 'attendance:subject-attendance' %}" class="list-group-item list-group-item-action">Mark Attendance</a>
+              </div>
+            </div>
+          </div>
+
+        {% endif %}
+        <div class="col-md-8">
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+            <div class="jumbotron">
+              <h1 class="display-5">NatyaKalanjali</h1>
+              <p class="lead">Register Students, Classes and mark attendance</p>
+              <hr class="my-4">
+              {% block content %}{% endblock %}
+            </div>
+
+        </div>
+      </div>
+    </main>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.js" integrity="sha512-WNLxfP/8cVYL9sj8Jnp6et0BkubLP31jhTG9vhL/F5uEZmg5wEzKoXp1kJslzPQWwPT1eyMiSxlKCgzHLOTOTQ==" crossorigin="anonymous"></script>
+    <!--<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>-->
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+
+
+{% block scripts %}
+
+{% endblock %}
+</body>
+</html>
