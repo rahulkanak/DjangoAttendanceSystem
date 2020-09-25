@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="{% static 'main.css' %}?version=1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.8.36/dayjs.min.js" integrity="sha512-nG86d7fodOg4f3fZF796WwIj6WwxdWI2DCXCarXZU05/UNHzC2CHQkD6dNdj6Ahaurrbed66rsvTt6r58RQ5WA==" crossorigin="anonymous"></script>
     <title>{% block title %}{% endblock title %}</title>
 
 </head>
@@ -60,9 +61,11 @@
               </div>
               <div class="tab-pane fade" id="list-attendance" role="tabpanel" aria-labelledby="list-attendance-list">
                   <a href="{% url 'attendance:subject-attendance' %}" class="list-group-item list-group-item-action">Mark Attendance</a>
+                  <a href="{% url 'attendance:student-view' %}" class="list-group-item list-group-item-action">View Students Attendance</a>
               </div>
             </div>
           </div>
+
 
         {% endif %}
         <div class="col-md-8">

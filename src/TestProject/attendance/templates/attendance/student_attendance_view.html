@@ -1,10 +1,103 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    View Student Attendance Page
+{% endblock %}
+
+{% block content %}
+<div style="width:100%;">
+    <div class="dropdown" style="width:50%; float:left;">
+
+        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Students
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            {% for student in students %}
+            <a class="dropdown-item" id="{{student.id}}" href="javascript:fetch_attendance_date('{{student.id}}')">{{ student.first_name }} {{ student.last_name}}</a>
+            <input type="hidden" name="student_id" id="student_id">
+            {% endfor %}
+        </div>
+
+    </div>
+    <div id="date-div" class="dropdown" style="width:50%; float:right;">
+
+    </div>
+</div>
+<div class="stuheader" id="student_name">
+
+</div>
+
+<div id="app">
+
+</div>
+
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function fetch_attendance_date(student_id){
+        document.getElementById('student_id').value = student_id;
+        var name_data = "<h5>"+$('#'+student_id).text()+"</h5>";
+        $('#student_name').html(name_data);
+        $("#app").html("");
+
+        $.ajax({
+            url:"{% url 'attendance:student-attendance-dates' %}",
+            data:{'student_id': student_id},
+            type: 'POST'
+        })
+            .done(function(response){
+                if(response == 'ERR'){
+                    alert('Error Retrieving Student Data');
+                }else{
+                    var div_data = '<button class="btn btn-primary dropdown-toggle" type="button" id="datesDropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
+                        'Dates </button><div class="dropdown-menu" aria-labelledby="datesDropdownMenuButton">';
+                    var date_data = JSON.parse(response);
+                    for(key in date_data){
+                        div_data += '<a class="dropdown-item" id="'+ date_data[key]["date"] +'" href="javascript:fetch_attendance_data(\''+ date_data[key]["date"] +'\')">'+ date_data[key]["date"];
+                    }
+                    div_data += '</div>'
+                    $("#date-div").html(div_data);
+                }
+
+            })
+            .fail(function(){
+                alert('Error Retrieving Student Data');
+            })
+    }
+    function fetch_attendance_data(date){
+        var student_id = document.getElementById('student_id').value;
+        $.ajax({
+            url:"{% url 'attendance:student-attendance-view' %}",
+            data:{'student_id': student_id, 'date': date},
+            type: 'POST'
+        })
+            .done(function(response){
+                if(response == 'ERR'){
+                    alert('Error Retrieving Student Data');
+                }else{
+                    var student_info = JSON.parse(response);
+                    var div_data = "<table class='table'><thead><tr><th scope='col'>Class Dates</th><th scope='col'>Subject</th><th scope='col'>Attendance Status</th></tr></thead><tbody>";
+                    for(key in student_info){
+                        if(student_info[key]['status'] == 'Present'){
+                            div_data+="<tr data-stat='present'><td scope='row'>"+student_info[key]['date']+"</td><td>"+student_info[key]['subject']+"</td><td>"+student_info[key]['status']+"</td></tr>";
+                        }else if(student_info[key]['status'] == 'Absent'){
+                            div_data+="<tr data-stat='absent'><td scope='row'>"+student_info[key]['date']+"</td><td>"+student_info[key]['subject']+"</td><td>"+student_info[key]['status']+"</td></tr>";
+                        }else{
+                            div_data+="<tr data-stat='tardy'><td scope='row'>"+student_info[key]['date']+"</td><td>"+student_info[key]['subject']+"</td><td>"+student_info[key]['status']+"</td></tr>";
+                        }
+
+                    }
+                    div_data+="</table>";
+                    $("#app").html(div_data);
+                }
+
+            })
+            .fail(function(){
+                alert('Error Retrieving Student Data');
+            })
+    }
+</script>
+{% endblock %}

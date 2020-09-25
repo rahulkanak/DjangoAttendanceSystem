@@ -6,6 +6,15 @@ from django.views.decorators.csrf import csrf_exempt
 from crispy_forms.helper import FormHelper, Layout
 import json, sys
 from .models import Attendance, AttendanceReport
+from datetime import datetime
+from calendar import monthrange
+
+
+CHOICES = {
+    'P': 'Present',
+    'A': 'Absent',
+    'T': 'Tardy'
+}
 
 
 class MyFormSetHelper(FormHelper):
@@ -46,7 +55,7 @@ def subject_for_attendance(request):
 def save_attendance_set(request):
     attendance_data = request.body
     attendance_data = json.loads(attendance_data)
-    # print(attendance_data)
+    print(attendance_data)
     subject_id = attendance_data[0].get('subject_id')
     subject_model = Subject.objects.get(pk=subject_id)
     attendance_date = attendance_data[0].get('date')
@@ -75,7 +84,7 @@ def get_saved_attendance(request):
     # print(attendance)
     if attendance:
         comment = attendance[0].comments
-        attendance_report = Attendance.objects.filter(attendance=attendance[0])
+        attendance_report = Attendance.objects.filter(attendance_report=attendance[0])
         # print(attendance_report.count())
         # student_data = serialize('python', student)
         attendance_data = []
@@ -104,5 +113,46 @@ def save_comment(request):
     except:
         print("Unexpected error:", sys.exc_info()[0])
         return HttpResponse("ERR")
+
+
+@login_required
+def student_view(request):
+    student = Student.objects.all()
+    context = {'students': student}
+    return render(request, 'attendance/student_attendance_view.html', context)
+
+
+@login_required
+@csrf_exempt
+def student_attendance_dates(request):
+    student_id = request.POST.get('student_id')
+    student_obj = Student.objects.get(pk=student_id)
+    attendance_obj = Attendance.objects.filter(student=student_obj).order_by('attendance_report__attendance_date')
+    dates = []
+    for data in attendance_obj:
+        date_dict = {"date": data.attendance_report.attendance_date.strftime("%B-%Y")}
+        if date_dict not in dates:
+            dates.append(date_dict)
+    return JsonResponse(json.dumps(dates), content_type='application/json', safe=False)
+
+
+@login_required
+@csrf_exempt
+def student_attendance_view(request):
+    student_id = request.POST.get('student_id')
+    sdate = request.POST.get('date')
+    student_obj = Student.objects.get(pk=student_id)
+    date = datetime.strptime(sdate, "%B-%Y")
+    weekdays, lastday = monthrange(date.year, date.month)
+    lastdate = datetime(date.year, date.month, lastday)
+    attendance_obj = Attendance.objects.filter(student=student_obj).\
+        filter(attendance_report__attendance_date__gte=date,attendance_report__attendance_date__lte=lastdate).\
+        order_by('attendance_report__attendance_date')
+    student_attendance_data = []
+    for data in attendance_obj:
+        stud_attendance = {"date": data.attendance_report.attendance_date.strftime("%Y-%m-%d"), "status": CHOICES.get(data.status),
+                           "subject": data.attendance_report.subject.class_name}
+        student_attendance_data.append(stud_attendance)
+    return JsonResponse(json.dumps(student_attendance_data), content_type='application/json', safe=False)
 
 
