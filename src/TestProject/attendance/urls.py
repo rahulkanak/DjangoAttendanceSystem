@@ -8,5 +8,7 @@ urlpatterns = [
     path('saveattendance/',attn_view.save_attendance_set, name='save-attendance'),
     path('savecomment/', attn_view.save_comment, name='save-comment'),
     path('getsavedattendance/',attn_view.get_saved_attendance, name='saved-attendance'),
-
+    path('studentview/',attn_view.student_view, name='student-view'),
+    path('studentattendance/',attn_view.student_attendance_view, name='student-attendance-view'),
+    path('studentattendancedates/', attn_view.student_attendance_dates, name='student-attendance-dates'),
 ]

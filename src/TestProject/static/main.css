@@ -99,3 +99,34 @@ a.article-title:hover {
   display: flow;
   margin-top: 0.01em;
 }
+
+.flex-container {
+    display: flex;
+}
+
+.flex-child {
+    flex: 1;
+    border: 2px solid yellow;
+}
+
+ tr[data-stat="present"]{
+    /*background-color: #427b41;*/
+     color: #427b41;
+     font-style:italic;
+}
+
+tr[data-stat="absent"]{
+    /*background-color: crimson;*/
+    color: crimson;
+}
+
+tr[data-stat="tardy"]{
+    /*background-color: darkgray;*/
+    color: darkgray;
+}
+
+.stuheader {
+    vertical-align: middle;
+    text-align: left;
+    font-size: 30px;
+}

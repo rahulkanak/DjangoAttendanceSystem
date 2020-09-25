@@ -8,7 +8,7 @@
 {% block content %}
 
 <div class="dropdown">
-  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+  <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
     Subjects
   </button>
   <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
@@ -17,6 +17,9 @@
       <input type="hidden" name="subject_id" id="subject_id">
       {% endfor %}
   </div>
+    <div class="stuheader" id="subject_name">
+
+    </div>
 
     <div id="student_data">
 
@@ -30,6 +33,9 @@
 <script>
     function fetch_attendance_data(subject_id){
         document.getElementById('subject_id').value = subject_id;
+        var name_data = "<h5>"+$('#'+subject_id).text()+"</h5>";
+        $('#subject_name').html(name_data);
+
        $.ajax({
            url:"{% url 'attendance:add-attendance' %}",
            type:'POST',

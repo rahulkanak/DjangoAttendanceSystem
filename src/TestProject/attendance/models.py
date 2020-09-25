@@ -17,7 +17,7 @@ class Attendance(models.Model):
     status = models.CharField(max_length=1, choices=(('P', 'Present'), ('A', 'Absent'), ('T', 'Tardy')), default='P')
     entry_date = models.DateField(default=date.today)
     student = models.ForeignKey(Student, related_name='attendance_student', on_delete=models.CASCADE)
-    attendance = models.ForeignKey(AttendanceReport, related_name='attendance_report', on_delete=models.CASCADE,null=True)
+    attendance_report = models.ForeignKey(AttendanceReport, related_name='attendance_report', on_delete=models.CASCADE,null=True)
 
     def __str__(self):
         return '{0} {1}'.format(self.status, self.student.first_name)
